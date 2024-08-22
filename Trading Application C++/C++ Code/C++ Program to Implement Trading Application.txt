@@ -1,0 +1,89 @@
+#include <iostream>  
+#include <vector>  
+  
+// Sample class representing a trading strategy  
+class SimpleMovingAverageStrategy {  
+private:  
+ std::vector<double> prices; // Store historical prices for analysis  
+ int windowSize; // Window size for calculating moving average  
+  
+public:  
+ SimpleMovingAverageStrategy(int windowSize) : windowSize(windowSize) {}  
+  
+ // Function to update historical prices  
+ void updatePrice(double price) {  
+ prices.push_back(price);  
+ if (prices.size() > windowSize) {  
+ prices.erase(prices.begin()); // Maintain a fixed-size window  
+ }  
+ }  
+  
+ // Function to check trading signal based on moving average  
+ bool generateSignal() {  
+ if (prices.size() < windowSize) {  
+ // Not enough data for analysis  
+ return false;  
+ }  
+  
+ double sum = 0.0;  
+ for (double price : prices) {  
+ sum += price;  
+ }  
+  
+ double movingAverage = sum / windowSize;  
+  
+ // Simple rule: Buy if the current price is below the moving average  
+ return prices.back() < movingAverage;  
+ }  
+};  
+
+
+class RiskManagement {  
+private:  
+ double riskPerTrade;  
+ double accountSize;  
+  
+public:  
+ RiskManagement(double riskPerTrade, double accountSize)  
+ : riskPerTrade(riskPerTrade), accountSize(accountSize) {}  
+  
+ int calculatePositionSize(double entryPrice, double stopLoss) {  
+ // Calculate position size based on risk per trade  
+ double dollarsAtRisk = accountSize * riskPerTrade;  
+ double dollarsPerContract = entryPrice - stopLoss;  
+ int positionSize = dollarsAtRisk / dollarsPerContract;  
+  
+ return positionSize;  
+ }  
+};  
+  
+  
+int main() {  
+ // Instantiate a trading strategy with a window size of 5  
+ SimpleMovingAverageStrategy strategy(5);  
+  
+ // Simulate receiving market data  
+ std::vector<double> marketData = {100.0, 105.0, 98.0, 110.0, 102.0, 95.0, 108.0};  
+  
+ // Simulate trading based on market data  
+ for (double price : marketData) {  
+ strategy.updatePrice(price);  
+  
+ // Check for trading signal  
+ if (strategy.generateSignal()) {  
+ std::cout << "Buy signal at price: " << price << std::endl;  
+ // Implement order execution logic here  
+ } else {  
+ // Implement sell signal or other actions  
+ }  
+ }  
+
+  RiskManagement riskManager(0.02, 100000); // Risk 2% of $100,000 per trade  
+ double entryPrice = 50.0;  
+ double stopLoss = 48.0;  
+  
+ int positionSize = riskManager.calculatePositionSize(entryPrice, stopLoss);  
+ std::cout << "Position size: " << positionSize << " contracts" << std::endl;  
+  
+ return 0;  
+}  
